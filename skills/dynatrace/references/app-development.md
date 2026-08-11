@@ -1,8 +1,8 @@
 # App development — AppEngine, app functions, the SDK
 
 Everything here comes from the **developer corpus**,
-`{{DEV_CORPUS}}` (205 pages, harvested 2026-08-06). None of it is
-in the docs corpus, and grepping `{{DOCS_CORPUS}}` harder will not
+`$DT_DEV` (205 pages, harvested 2026-08-06). None of it is
+in the docs corpus, and grepping `$DT_DOCS` harder will not
 produce it. Cite the developer corpus explicitly when answering from this file.
 
 ## Contents

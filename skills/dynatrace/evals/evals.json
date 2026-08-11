@@ -1,6 +1,6 @@
 {
   "skill_name": "dynatrace",
-  "notes": "Each prompt targets one claim the skill makes. Every assertion is checkable against {{DOCS_CORPUS}}, so grading needs no judgement call.",
+  "notes": "Each prompt targets one claim the skill makes. Every assertion is checkable against $DT_DOCS, so grading needs no judgement call.",
   "evals": [
     {
       "id": 1,

@@ -54,9 +54,10 @@ Any HTML-to-Markdown pipeline will do. What the skill expects:
 - one `.md` per page, with the source URL in frontmatter
 - roughly 4 400 pages for the docs site, 205 for the developer site
 
-`setup.py` asks where that corpus lives and writes the path into the skill. If
-you have no corpus yet, the skill still loads — it just tells you when an answer
-would need one, instead of inventing it.
+Two shell variables, `DT_DOCS` and `DT_DEV`, tell the skill where that copy
+lives; they are documented at the top of `references/corpus-map.md`. If you have
+no corpus yet the skill still loads — it just tells you when an answer would
+need one, instead of inventing it.
 
 Building a local copy of public documentation for your own reference is
 ordinary. Redistributing it is not, and neither this repository nor the skill
@@ -66,15 +67,12 @@ helps you do that.
 
 ```bash
 git clone https://github.com/valcheffnet/ValcheffDynatraceAssistant.git
-cd ValcheffDynatraceAssistant
-python setup.py
+cp -r ValcheffDynatraceAssistant/skills/dynatrace ~/.claude/skills/
 ```
 
-`setup.py` asks where your corpus and Claude home live, substitutes the
-`{{PLACEHOLDER}}` tokens, and copies the skill into `~/.claude/skills/dynatrace`.
-It writes nowhere else. Use `--dry-run` to see what it would do first.
-
-Then ask Claude a Dynatrace question. The skill triggers on its own.
+That is all of it. No installer, no Python, nothing compiled. See
+[INSTALL.md](INSTALL.md) for the Windows form, how to point the skill at a
+corpus, and how to check it loaded.
 
 ## Status and limits
 

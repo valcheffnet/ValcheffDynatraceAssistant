@@ -37,11 +37,15 @@ questions can look like one topic and still turn on different wording.
 
 **When the references are silent, three steps in this order:**
 
-1. **Grep the local corpus** — `{{DOCS_CORPUS}}`, 4403 pages, the whole
-   of docs.dynatrace.com, snapshot 2026-08-05. Offline, links resolved, and
+`$DT_DOCS` and `$DT_DEV` below are the operator's own corpus directories,
+defined at the top of `references/corpus-map.md`. If they are unset there is no
+corpus on this machine: say so and go to step 3 rather than guessing at a path.
+
+1. **Grep the local corpus** — `$DT_DOCS`, roughly 4 400 pages, the whole
+   of docs.dynatrace.com. Offline, links resolved, and
    **image content carried as text**. `references/corpus-map.md` says what lives
    where.
-2. **Grep the second corpus** — `{{DEV_CORPUS}}`, 205 pages of
+2. **Grep the second corpus** — `$DT_DEV`, 205 pages of
    `developer.dynatrace.com`. App development on the new platform: AppEngine and
    app functions with their runtime limits, the app manifest, the App Toolkit,
    `@dynatrace-sdk/*` reference, platform services. **A question about app

@@ -5,7 +5,7 @@ does not exist. Grail is schema-on-read, so a wrong name does not error — the
 query returns nothing, or a column of nulls, and looks like a data problem.
 **Never write a field name from memory. Confirm it here or in the corpus first.**
 
-The authority is `{{DOCS_CORPUS}}/semantic-dictionary` — 274 files,
+The authority is `$DT_DOCS/semantic-dictionary` — 274 files,
 2.44M words, 92 354 table rows, no images. This file carries the shape of that
 reference plus the names worth knowing by heart; everything else is one grep
 away.
@@ -29,13 +29,13 @@ Three greps, in order of narrowness:
 
 ```bash
 # 1. does this exact name exist at all, and in which domain?
-grep -rn '`k8s.namespace.name`' {{DOCS_CORPUS}}/semantic-dictionary --include=*.md
+grep -rn '`k8s.namespace.name`' $DT_DOCS/semantic-dictionary --include=*.md
 
 # 2. what fields exist in a namespace?
-grep -n '^| `span\.' {{DOCS_CORPUS}}/semantic-dictionary/fields.md
+grep -n '^| `span\.' $DT_DOCS/semantic-dictionary/fields.md
 
 # 3. what does one entity type carry?
-grep -A3 '^fetch dt.entity.host$' {{DOCS_CORPUS}}/semantic-dictionary/model/dt-entities.md
+grep -A3 '^fetch dt.entity.host$' $DT_DOCS/semantic-dictionary/model/dt-entities.md
 ```
 
 `fields.md` is the **global** reference: fields with a defined meaning that
@@ -111,7 +111,7 @@ before inventing.
 The full namespace list:
 
 ```bash
-grep -o '^## .*' {{DOCS_CORPUS}}/semantic-dictionary/fields.md
+grep -o '^## .*' $DT_DOCS/semantic-dictionary/fields.md
 ```
 
 ## Fields that carry permissions
@@ -140,7 +140,7 @@ Regenerate the list:
 
 ```bash
 grep -rhoP '^\| `[a-z0-9_.]+`(?=.*Tags: `permission`)' \
-  {{DOCS_CORPUS}}/semantic-dictionary/model | tr -d '|` ' | sort -u
+  $DT_DOCS/semantic-dictionary/model | tr -d '|` ' | sort -u
 ```
 
 ## Primary Grail tags
@@ -243,7 +243,7 @@ Full list with every field per type:
 
 ```bash
 grep -o '^fetch dt\.entity\.[a-z_0-9]*' \
-  {{DOCS_CORPUS}}/semantic-dictionary/model/dt-entities.md | sort -u
+  $DT_DOCS/semantic-dictionary/model/dt-entities.md | sort -u
 ```
 
 > Provider-specific entity fields are frequently marked `deprecated` even while

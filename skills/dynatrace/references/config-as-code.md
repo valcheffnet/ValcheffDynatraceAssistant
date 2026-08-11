@@ -88,7 +88,7 @@ Rather than guessing, grep the support pages:
 
 ```bash
 grep -rn "Site Reliability Guardian" \
-  {{DOCS_CORPUS}}/deliver/configuration-as-code --include=*.md
+  $DT_DOCS/deliver/configuration-as-code --include=*.md
 ```
 
 Things that are explicitly documented as config-as-code manageable:

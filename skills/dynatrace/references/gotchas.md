@@ -31,7 +31,7 @@ the user quotes the docs or the UI.
 
 If a grep hits, say so plainly and give the working form. Do not silently "correct" the
 user — they are usually quoting the official page, and telling them *why* it fails is the
-answer. If a grep misses, the corpus at `{{DOCS_CORPUS}}` is the next stop
+answer. If a grep misses, the corpus at `$DT_DOCS` is the next stop
 (see `corpus-map.md`); a miss is not evidence the page is correct.
 
 ## Severity classes
@@ -995,7 +995,7 @@ images), 2026-08-05. The per-image detail — the full transcription that produc
 — lives in a `stage4` block next to the image in the corpus. To read one:
 
 ```bash
-grep -rn "stage4:start" {{DOCS_CORPUS}}/<path-to-page>.md
+grep -rn "stage4:start" $DT_DOCS/<path-to-page>.md
 ```
 
 Findings were recorded only where the image and the prose disagree on something checkable.

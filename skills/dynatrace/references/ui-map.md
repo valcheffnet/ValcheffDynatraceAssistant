@@ -23,7 +23,7 @@ is a legitimate answer — see "When the map is silent".
 ## Where the data lives
 
 ```
-{{DOCS_CORPUS}}/_reports/ui-map.tsv
+$DT_DOCS/_reports/ui-map.tsv
 ```
 
 1 015 rows, 815 distinct destinations, drawn from 2 329 path occurrences across
@@ -79,13 +79,13 @@ not present them as two options; take the newer spelling.
 
 ```bash
 # every route to a destination, newest first
-grep -P "\tLog ingest rules\t" {{DOCS_CORPUS}}/_reports/ui-map.tsv | sort -t$'\t' -k7 -r
+grep -P "\tLog ingest rules\t" $DT_DOCS/_reports/ui-map.tsv | sort -t$'\t' -k7 -r
 
 # what lives under a menu (prefix query)
-grep -P "\tSettings > Collect and capture" {{DOCS_CORPUS}}/_reports/ui-map.tsv
+grep -P "\tSettings > Collect and capture" $DT_DOCS/_reports/ui-map.tsv
 
 # only the latest platform, only trustworthy rows
-grep -P "^latest\thigh\t" {{DOCS_CORPUS}}/_reports/ui-map.tsv | grep -i "openpipeline"
+grep -P "^latest\thigh\t" $DT_DOCS/_reports/ui-map.tsv | grep -i "openpipeline"
 ```
 
 Then cite the `example_source` page, and say which generation and how old the

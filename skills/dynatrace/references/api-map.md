@@ -105,7 +105,7 @@ controls…" usually ends.
 Grep by schema id:
 
 ```bash
-grep -rln "builtin:openpipeline" {{DOCS_CORPUS}}/dynatrace-api/environment-api/settings
+grep -rln "builtin:openpipeline" $DT_DOCS/dynatrace-api/environment-api/settings
 ```
 
 Settings objects are also the unit that owner-based access control applies to —

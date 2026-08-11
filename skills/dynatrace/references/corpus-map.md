@@ -1,6 +1,28 @@
-# The Dynatrace documentation — the local corpus and the live site
+# The corpus
 
-`{{DOCS_CORPUS}}` holds the whole of `docs.dynatrace.com` converted to Markdown:
+## Set these two first
+
+Every command in this skill refers to your corpus through two shell variables.
+Set them once per session, or add them to your shell profile:
+
+```bash
+export DT_DOCS=/path/to/your/docs.dynatrace.com/corpus
+export DT_DEV=/path/to/your/developer.dynatrace.com/corpus
+```
+
+Windows PowerShell:
+
+```powershell
+$env:DT_DOCS = "E:/some/path/docs"
+$env:DT_DEV  = "E:/some/path/developer"
+```
+
+**There is no installer and nothing to substitute.** If `$DT_DOCS` is unset, the
+commands below will fail loudly rather than search the wrong place — which is
+the intended behaviour. The skill still answers from its references without a
+corpus; it just says so when an answer would need one.
+
+`$DT_DOCS` holds the whole of `docs.dynatrace.com` converted to Markdown:
 **4 403 pages, 7.83M words**, snapshot **2026-08-05**, in sync with the live sitemap on that
 date. Every page carries YAML frontmatter with its `source_url`, `generation` and `lastmod`,
 and every image on every page has been either transcribed into the text or explicitly marked
@@ -43,19 +65,19 @@ cleaner (chrome stripped, links resolved) and richer (image content as text) tha
 
 ```bash
 # an identifier — field name, metric key, permission, endpoint
-grep -rn "dt.host.cpu.usage" {{DOCS_CORPUS}} --include=*.md
+grep -rn "dt.host.cpu.usage" $DT_DOCS --include=*.md
 
 # narrow to a section first when the term is common
-grep -rn "bucket" {{DOCS_CORPUS}}/platform/grail --include=*.md
+grep -rn "bucket" $DT_DOCS/platform/grail --include=*.md
 
 # find the page for a concept, then read it whole
-grep -rl "OpenPipeline" {{DOCS_CORPUS}}/platform --include=*.md
+grep -rl "OpenPipeline" $DT_DOCS/platform --include=*.md
 
 # what a screenshot showed — transcriptions live in stage4 blocks
-grep -rn "stage4:start" {{DOCS_CORPUS}}/observe/... --include=*.md
+grep -rn "stage4:start" $DT_DOCS/observe/... --include=*.md
 
 # the URL a local file came from
-head -8 {{DOCS_CORPUS}}/platform/grail/dynatrace-query-language.md
+head -8 $DT_DOCS/platform/grail/dynatrace-query-language.md
 ```
 
 Links between pages are rewritten to relative `.md` paths, so a link in one file opens the
@@ -234,7 +256,7 @@ and the corpus faithfully reproduces the error, because it is a faithful copy.
 lives on a separate domain, and 204 of its pages are mirrored locally:
 
 ```
-{{DEV_CORPUS}}        205 pages, 1.97M words, harvested 2026-08-06
+$DT_DEV        205 pages, 1.97M words, harvested 2026-08-06
 ```
 
 | Subtree | Pages | What it answers |
@@ -254,8 +276,8 @@ concurrency — and no amount of grepping the main corpus will produce them.
 Search it the same way:
 
 ```bash
-grep -rn "256 M" {{DEV_CORPUS}} --include=*.md
-grep -rl "app function" {{DEV_CORPUS}}/develop --include=*.md
+grep -rn "256 M" $DT_DEV --include=*.md
+grep -rl "app function" $DT_DEV/develop --include=*.md
 ```
 
 **Not harvested: `design/`, 364 pages.** The Strato design system — components,
@@ -268,7 +290,7 @@ transcription blocks and 6 recorded skips across 31 files**, every image
 adjudicated. Same sentinel format as the docs corpus, so the same grep works:
 
 ```bash
-grep -rn "stage4:start" {{DEV_CORPUS}} --include=*.md
+grep -rn "stage4:start" $DT_DEV --include=*.md
 ```
 
 It is worth grepping. Several of those blocks are the only record of something:
@@ -276,7 +298,7 @@ It is worth grepping. Several of those blocks are the only record of something:
 shortcuts, the six VS Code extension commands, and context menus the prose
 describes only as "select any of the available options".
 
-`{{DEV_CORPUS}}/_assets/` holds 13 images that the site inlined as
+`$DT_DEV/_assets/` holds 13 images that the site inlined as
 base64 and the converter had to decode to files. Pages reference them by relative
 path. They are part of the corpus, not scratch.
 
@@ -383,7 +405,7 @@ Two failure modes do *not* fit the pattern, so do not over-apply it:
 Regenerate the table:
 
 ```bash
-grep -rh "^lastmod:" {{DOCS_CORPUS}} --include=*.md | sort | uniq -c
+grep -rh "^lastmod:" $DT_DOCS --include=*.md | sort | uniq -c
 ```
 
 ## Freshness

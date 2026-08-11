@@ -18,7 +18,9 @@ page-hashes.tsv
 image-index.tsv
 
 # --- local setup -------------------------------------------------------------
-# setup.py writes real absolute paths here. Machine-specific by definition.
+# Nothing here should carry a real corpus path. The skill reads $DT_DOCS and
+# $DT_DEV from the environment, so there is no config file to leak — these
+# patterns only guard against someone adding one.
 config.json
 config.local.json
 *.local
