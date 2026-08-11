@@ -48,7 +48,17 @@ Any HTML-to-Markdown pipeline will do. What the skill expects:
 
 - a mirrored directory tree matching the site's URL paths
 - one `.md` per page, with the source URL in frontmatter
-- roughly 4 400 pages for the docs site, 205 for the developer site
+
+For scale, the corpus this skill was measured against:
+
+| | pages | words |
+|---|---:|---:|
+| `docs.dynatrace.com` | 4 437 | 7 867 499 |
+| `developer.dynatrace.com` | 205 | 1 982 166 |
+| **together** | **4 642** | **9 849 665** |
+
+Those figures are from August 2026 and will drift as the sites do. They are
+here so you know what to expect: about 70 MB of Markdown on disk.
 
 Two shell variables, `DT_DOCS` and `DT_DEV`, tell the skill where that copy
 lives; they are documented at the top of `references/corpus-map.md`. If you have
