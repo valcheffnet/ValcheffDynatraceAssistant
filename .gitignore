@@ -9,7 +9,7 @@ _reports/
 *.corpus/
 **/all-doc-paths.txt
 
-# Derived indexes — regenerate with `driver.py indexes`, never commit.
+# Derived indexes — rebuilt by the corpus tooling, never commit.
 # They embed another site's structure and go stale the moment it moves.
 section-index.tsv
 ui-map.tsv

@@ -22,17 +22,10 @@ KEYS = [
     ("CLAUDE_HOME", "Your Claude home", "~/.claude"),
     ("SKILL_DIR", "Where the dynatrace skill will be installed",
      "{CLAUDE_HOME}/skills/dynatrace"),
-    ("DRIVER_DIR", "Where the run-dynatrace-docs skill will be installed",
-     "{CLAUDE_HOME}/skills/run-dynatrace-docs"),
     ("PROJECT_ROOT", "Directory holding your corpora", ""),
     ("DOCS_CORPUS", "Your docs.dynatrace.com corpus", "{PROJECT_ROOT}/docs"),
     ("DEV_CORPUS", "Your developer.dynatrace.com corpus",
      "{PROJECT_ROOT}/developer"),
-    ("MD_WORKFLOW", "Directory holding url2md.py and friends", ""),
-    ("VENV_PYTHON", "Python executable of your markitdown venv", ""),
-    ("BACKUP_DIR", "Where corpus backups go", "{PROJECT_ROOT}-backup"),
-    ("WORKSPACE_DIR", "Scratch directory for evaluation runs",
-     "{CLAUDE_HOME}/skills/dynatrace-workspace"),
 ]
 
 
@@ -56,8 +49,7 @@ def ask(existing):
 
 
 def install(cfg, dry):
-    pairs = [("skills/dynatrace", cfg["SKILL_DIR"]),
-             ("skills/run-dynatrace-docs", cfg["DRIVER_DIR"])]
+    pairs = [("skills/dynatrace", cfg["SKILL_DIR"])]
     text_ext = {".md", ".py", ".json", ".sh", ".txt", ".yml", ".yaml"}
     total = 0
     for rel, dest in pairs:
@@ -97,12 +89,12 @@ def main():
         print("Using %s as defaults.\n" % CONFIG)
 
     cfg = ask(existing)
-    missing = [k for k in ("DOCS_CORPUS", "MD_WORKFLOW", "VENV_PYTHON")
+    missing = [k for k in ("DOCS_CORPUS", "DEV_CORPUS")
                if not os.path.exists(cfg[k])]
     if missing:
-        print("\nThese do not exist yet: %s" % ", ".join(missing))
-        print("That is fine before you build a corpus, but the skill will not "
-              "find anything until they do.\n")
+        print("\nNot there yet: %s" % ", ".join(missing))
+        print("Fine before you build a corpus. The skill loads either way and "
+              "says when an answer would need one.\n")
 
     if not args.dry_run:
         io.open(CONFIG, "w", encoding="utf-8", newline="\n").write(
@@ -111,8 +103,9 @@ def main():
     install(cfg, args.dry_run)
 
     if not args.dry_run:
-        print("\nNext: build a corpus, then run\n"
-              "  %s %s/driver.py check" % (cfg["VENV_PYTHON"], cfg["DRIVER_DIR"]))
+        print("\nNext: build a corpus at %s, then ask Claude a Dynatrace\n"
+              "question — the skill triggers on its own."
+              % cfg["DOCS_CORPUS"])
 
 
 main()

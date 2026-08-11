@@ -295,8 +295,8 @@ The page is latest; its subject is Classic. `generation` cannot express that, so
 grep the names when a question is about reaching Classic APIs from an app.
 
 *No `lastmod`.* The sitemap carries none, so `--skip-unchanged` does not work
-here and there is no per-page age to check, and `run-dynatrace-docs check` cannot
-report drift for this corpus. Staleness has to be judged by re-fetching, not by
+here and there is no per-page age to check, so date-based drift detection
+does not apply to this corpus. Staleness has to be judged by re-fetching, not by
 reading the frontmatter.
 
 **Units disagree across the two domains.** developer.dynatrace.com says app
@@ -391,9 +391,8 @@ grep -rh "^lastmod:" {{DOCS_CORPUS}} --include=*.md | sort | uniq -c
 Snapshot 2026-08-05, in sync with the live sitemap on that date (0 new, 0 changed,
 0 removed). Upstream changes ~400–500 pages a month. The corpus is its own state file: each
 page carries `source_url` and `lastmod`, so changed, new and removed pages are all derivable
-from a fresh sitemap. Procedure and tooling:
-`{{DOCS_CORPUS}}/_reports/UPDATE-PLAN.md`, driven by the project skill
-`run-dynatrace-docs`.
+from a fresh sitemap. The procedure your corpus was built with should be
+recorded alongside it; this skill reads a corpus but does not build one.
 
 If a question turns on behaviour that changed recently, check `lastmod` on the page being
 quoted, and fall back to `dtfetch.sh` when it looks stale.

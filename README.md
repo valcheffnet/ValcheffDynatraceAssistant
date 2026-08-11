@@ -1,68 +1,66 @@
 # ValcheffDynatraceAssistant
 
-Two Claude Code skills for working with Dynatrace: a distilled reference layer,
-and the tooling to build your own local copy of the documentation it routes to.
+A Claude Code skill that answers Dynatrace questions from a distilled reference
+layer instead of recollection.
 
 **Not affiliated with, endorsed by, or produced by Dynatrace LLC.** "Dynatrace"
-is used here only to name the product these skills are about.
+is used here only to name the product this skill is about.
 
 ---
 
 ## What this is, and what it deliberately is not
 
 **It is** ~39 000 words of distilled reference across 30 files, 85 recorded
-places where the official documentation is wrong or contradicts itself, a map of
-1 015 UI navigation routes split by platform generation, and a driver that
-builds and verifies a documentation corpus.
+places where the official documentation is wrong or contradicts itself, and a
+map of 1 015 UI navigation routes split by platform generation.
 
-**It is not a copy of the Dynatrace documentation.** No corpus is included and
-none ever will be. The skills expect you to build your own local copy from the
-public site, for your own reference, using the driver here. That is a few
-minutes of your bandwidth and stays on your disk.
+**It is not a copy of the Dynatrace documentation**, and it is not a scraper.
+No corpus is included and none ever will be. The skill reads a local copy of the
+documentation that you build yourself, with tooling of your own; it never
+fetches or redistributes anything.
 
-The value is the judgement layer, not the text. Anyone can fetch the docs; the
-work was in measuring where they lie.
+The value is the judgement layer, not the text. Anyone can read the docs; the
+work was in measuring where they mislead.
 
 ## What you get
 
-### `skills/dynatrace`
-
-A reference layer that answers from files rather than recollection.
-
-- 30 references covering DQL and DPL, Grail, OpenPipeline, IAM, OneAgent and
+- **30 references** covering DQL and DPL, Grail, OpenPipeline, IAM, OneAgent and
   ActiveGate, ingest paths, dashboards, workflows, SLOs, AppSec, licensing, the
   API surface, config as code, and AppEngine app development.
 - **`references/gotchas.md`** — 85 numbered entries, each a measured case where
-  the documentation does not work as printed. This is the part that does not
-  exist anywhere else.
+  the documentation does not work as printed: a rule contradicted by the
+  vendor's own examples, a field deprecated in one place and current in another,
+  a limit stated twice with different numbers. This part does not exist anywhere
+  else.
 - **`references/ui-map.md`** — how to answer "where is this menu" without
-  guessing, keyed by destination and split Classic against latest, because a
-  migrated tenant runs both and a path for the wrong one is worse than none.
-- `evals/` — three rounds of evaluation with the questions, the expected
-  answers, and the results, including the rounds that measured nothing.
+  guessing. Keyed by destination and split Classic against latest, because a
+  migrated tenant runs both and a path for the wrong one is worse than none. It
+  also separates a genuine second route from a menu that simply moved.
+- **`references/corpus-map.md`** — how the documentation is laid out, which
+  sections are maintained and which are years stale, and how to search it.
+- **`evals/`** — three rounds of evaluation with the questions, the expected
+  answers, and the results. Including the first round, which measured nothing
+  and says so.
 
-### `skills/run-dynatrace-docs`
+## The corpus
 
-The driver that builds and checks the corpus.
+The skill routes to a local Markdown copy of `docs.dynatrace.com` and
+`developer.dynatrace.com`. **You build that copy; this repository does not ship
+it and does not build it for you.**
 
-| subcommand | does |
-|---|---|
-| `check` | what changed upstream, by `lastmod` |
-| `devcheck` | the same for a sitemap without dates, by content hash |
-| `verify` | integrity: links, sentinels, encoding |
-| `anchors` | do `page.md#anchor` links land on anything |
-| `images` | have any images changed |
-| `indexes` | rebuild the derived indexes |
-| `stats` | per-section counts |
+Any HTML-to-Markdown pipeline will do. What the skill expects:
 
-## Requirements
+- a mirrored directory tree matching the site's URL paths
+- one `.md` per page, with the source URL in frontmatter
+- roughly 4 400 pages for the docs site, 205 for the developer site
 
-- Claude Code
-- Python 3.13 — **not 3.14**: `magika` caps below it and pip silently installs
-  an ancient MarkItDown that looks fine and converts nothing
-- MarkItDown 0.1.7 with `[all]` extras, in a virtualenv
-- The conversion tooling (`url2md.py` and friends), which lives outside this
-  repository
+`setup.py` asks where that corpus lives and writes the path into the skill. If
+you have no corpus yet, the skill still loads — it just tells you when an answer
+would need one, instead of inventing it.
+
+Building a local copy of public documentation for your own reference is
+ordinary. Redistributing it is not, and neither this repository nor the skill
+helps you do that.
 
 ## Install
 
@@ -72,48 +70,29 @@ cd ValcheffDynatraceAssistant
 python setup.py
 ```
 
-`setup.py` asks where your corpus, tooling and Claude home live, substitutes the
-`{{PLACEHOLDER}}` tokens, and copies the skills into `~/.claude/skills/`.
-Nothing is written outside those paths.
+`setup.py` asks where your corpus and Claude home live, substitutes the
+`{{PLACEHOLDER}}` tokens, and copies the skill into `~/.claude/skills/dynatrace`.
+It writes nowhere else. Use `--dry-run` to see what it would do first.
 
-Then build a corpus of your own:
-
-```bash
-python <your-md-workflow>/url2md.py https://docs.dynatrace.com/sitemap.xml --sitemap --mirror --strip-prefix docs --frontmatter --docsite --link-prefix=/docs --link-origin https://docs.dynatrace.com -o <your-corpus-dir>
-```
-
-Expect roughly 4 400 pages. Re-run `driver.py check` afterwards; it should
-report nothing changed.
-
-## On the corpus, plainly
-
-Building a local copy of a vendor's public documentation for your own reference
-is ordinary. Redistributing it is not, and this repository does not.
-
-If you build a corpus with these tools, it is yours to read, grep and search.
-Do not republish it. Every converted page keeps its `source_url` in frontmatter
-so the origin is never in doubt.
-
-The short quotations inside `references/` are attributed to the page they came
-from and are there as evidence for a specific claim — usually that the
-documentation says something contradictory. They remain the property of their
-author.
+Then ask Claude a Dynatrace question. The skill triggers on its own.
 
 ## Status and limits
 
 Built and measured against docs.dynatrace.com and developer.dynatrace.com during
 August 2026.
 
-- **The gotchas decay.** Each says which page and which date it was measured
+- **The gotchas decay.** Each records the page and the date it was measured
   against. When Dynatrace fixes something, the entry becomes wrong. Check the
   date before quoting one.
 - **The UI map is documented routes, not the interface.** It proves the paths it
-  contains; it never proves a menu has no other children.
-- **`run-dynatrace-docs` may move.** A general-purpose successor that handles
-  any documentation site is in progress. If that lands, this driver stays as the
-  Dynatrace-specific wrapper and the generic work moves out.
+  contains; it never proves a menu has no other children. Where it is silent,
+  the honest answer is to say so and ask for a screenshot.
+- **Classic and latest both count.** Classic has no published end-of-life date,
+  and a migrated tenant carries both layers at once. The skill is built to
+  answer for whichever one you are actually looking at, or to ask which.
 
 ## Licence
 
-MIT for the skills, references and tooling in this repository. Quoted passages
-belong to their original authors. See `LICENSE`.
+MIT for the skill, references and evaluation data in this repository. The short
+quoted passages inside `references/` are attributed to the page they came from
+and remain the property of their author. See `LICENSE`.
