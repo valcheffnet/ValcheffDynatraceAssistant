@@ -1,0 +1,55 @@
+{
+  "skill_name": "dynatrace",
+  "notes": "Each prompt targets one claim the skill makes. Every assertion is checkable against {{DOCS_CORPUS}}, so grading needs no judgement call.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "iam-both-levels",
+      "prompt": "We're rolling out Grail access for our platform team at the bank. I need an IAM policy that lets the group read logs only from the bucket logs_delivery_90d and only where the security context is TeamA. Give me the policy statement. Also — one of our guys says he wrote a DENY so a different group can't see the sensitive records, filtering on dt.security_context. Does that work?",
+      "expected_output": "A policy with BOTH a storage:buckets:read statement and a storage:logs:read statement, and an explicit statement that record-level DENY does not work (DENY applies at bucket level only).",
+      "assertions": [
+        "The answer includes a storage:buckets:read statement, not only storage:logs:read",
+        "The answer states that both a bucket permission and a table permission are required",
+        "The answer says DENY works at bucket level and does NOT work at record level",
+        "The answer does not invent a permission name outside the storage:* namespace"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "otlp-endpoint-trap",
+      "prompt": "otel collector keeps failing to export traces to dynatrace. error is: not retryable error: Permanent error: rpc error: code = Unimplemented desc = error exporting items, request to https://abc12345.live.apps.dynatrace.com/api/v2/otlp/v1/traces. we're on saas. what's wrong",
+      "expected_output": "Identifies the hostname as the problem: .live.apps.dynatrace.com must be .live.dynatrace.com. Bonus: notes gRPC is unsupported and protocol must be http/protobuf.",
+      "assertions": [
+        "The answer identifies the wrong hostname (apps subdomain) as the cause",
+        "The answer gives the correct base URL form https://{environment-id}.live.dynatrace.com/api/v2/otlp",
+        "The answer does not attribute the Unimplemented error to an unsupported protocol version or a Dynatrace outage",
+        "If token scopes are mentioned, openTelemetryTrace.ingest is named correctly"
+      ]
+    },
+    {
+      "id": 3,
+      "name": "field-names-permission",
+      "prompt": "Which fields can I actually use in an IAM WHERE clause for record-level permissions in Grail? I want to isolate data per Kubernetes namespace and per AWS account, and I have some custom telemetry that has neither.",
+      "expected_output": "Names k8s.namespace.name and aws.account.id as permission fields, and dt.security_context as the escape hatch for custom telemetry, set at the source or in OpenPipeline.",
+      "assertions": [
+        "k8s.namespace.name is named exactly (not k8s.namespace or namespace.name)",
+        "aws.account.id is named exactly",
+        "dt.security_context is identified as the universal fallback for data without a dedicated permission field",
+        "The answer says the set of permission-capable fields is limited, rather than implying any field can be used",
+        "If MATCH is discussed, the answer notes it is required for array-valued fields"
+      ]
+    },
+    {
+      "id": 4,
+      "name": "openpipeline-order",
+      "prompt": "I have two bucket assignment processors in the same OpenPipeline pipeline and records are landing in the wrong bucket sometimes. Both matchers can match the same record. How does Dynatrace decide?",
+      "expected_output": "The Storage stage applies FIRST MATCH ONLY, so processor order decides; contrasts with stages that execute all matches.",
+      "assertions": [
+        "The answer states that the Storage stage applies only the first matching processor",
+        "The answer says processor order determines the outcome",
+        "The answer does not claim the last match wins or that both are applied",
+        "Bonus: notes that the Permissions stage behaves the same way, while other stages execute all matches"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+# --- never commit a documentation corpus -------------------------------------
+# The skills build a local copy of docs.dynatrace.com for personal reference.
+# That copy is not ours to redistribute. These patterns are deliberately broad:
+# a corpus accidentally committed is far harder to undo than a false positive.
+docs/
+developer/
+corpus/
+_reports/
+*.corpus/
+**/all-doc-paths.txt
+
+# Derived indexes — regenerate with `driver.py indexes`, never commit.
+# They embed another site's structure and go stale the moment it moves.
+section-index.tsv
+ui-map.tsv
+ui-topography.md
+page-hashes.tsv
+image-index.tsv
+
+# --- local setup -------------------------------------------------------------
+# setup.py writes real absolute paths here. Machine-specific by definition.
+config.json
+config.local.json
+*.local
+
+# --- editor and tooling ------------------------------------------------------
+.obsidian/
+.vscode/
+.idea/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# --- os ----------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini

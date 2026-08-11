@@ -1,0 +1,87 @@
+{
+  "skill_name": "dynatrace",
+  "iteration": 2,
+  "design_note": "Iteration 1 failed to discriminate: every question had a public answer from before the training cutoff, so the baseline scored 21/23 against the skill's 23/23. These ten are chosen because the correct answer is either counter-intuitive, a hallucination trap, or a specific limit that memory cannot supply. Each names the expected failure mode of an ungrounded answer.",
+  "evals": [
+    {
+      "id": 1,
+      "name": "autotag-hostname-substring",
+      "topic": "Auto-tag value from part of a hostname",
+      "tests": "Classic tagging, placeholder syntax, Classic tags against Grail tags",
+      "prompt": "Имам hostname-и по схемата prod-web-01, prod-db-02, staging-web-03. Искам auto-tag, чиято стойност да е първата част от hostname-а (prod / staging), за да мога после да филтрирам по нея. Как се дефинира правилото и какъв е синтаксисът за стойността?",
+      "failure_mode": "Inventing a placeholder syntax, or answering with Grail primary tags when the question is about Classic auto-tagging (or the reverse) without saying which."
+    },
+    {
+      "id": 2,
+      "name": "dpl-parse-url",
+      "topic": "DQL parse of a URL into version and path",
+      "tests": "DPL matchers, parse syntax",
+      "prompt": "I have a log field `url.path` with values like /api/v2/entities/list and /api/v1/metrics/query. I want two new fields in DQL: the API version (v1, v2) and the rest of the path after it. Give me the parse expression.",
+      "failure_mode": "Writing a regex or a named capture group instead of DPL matchers, or omitting the export names."
+    },
+    {
+      "id": 3,
+      "name": "workflow-http-431",
+      "topic": "Workflow DQL task fails with HTTP 431",
+      "tests": "Diagnosis: the cause is too many permissions in authorization settings, not the query",
+      "prompt": "Our workflow has a DQL query task and it started failing with HTTP 431. The same query runs fine in a notebook. We didn't change the query. What is going on?",
+      "failure_mode": "Blaming the query length, the URL, or a proxy, instead of the request header size caused by the granted permissions."
+    },
+    {
+      "id": 4,
+      "name": "host-groups-rest-api",
+      "topic": "REST API for host groups",
+      "tests": "There is no such endpoint — hallucination trap",
+      "prompt": "What's the REST API endpoint to list all host groups in my environment and create a new one? I want to automate host group management.",
+      "failure_mode": "Inventing an endpoint such as /api/v2/hostGroups. Host group is set on the host by OneAgent, not managed through an API."
+    },
+    {
+      "id": 5,
+      "name": "eventselector-property-400",
+      "topic": "eventSelector with property.<key> returns 400",
+      "tests": "Events API v2, fixed allow-list of searchable fields",
+      "prompt": "Calling the Events API v2 with eventSelector=property.myCustomKey(\"abc\") returns 400 Bad Request. The property definitely exists on the events — I can see it in the payload. Why is it rejected?",
+      "failure_mode": "Suggesting quoting or encoding fixes instead of stating that eventSelector supports only a fixed set of fields."
+    },
+    {
+      "id": 6,
+      "name": "log-ingest-split-events",
+      "topic": "Splitting merged logs through the ingest API",
+      "tests": "JSON array = N events, plain text = 1 event per call",
+      "prompt": "We're pushing logs to the Log Monitoring API v2 and everything arrives as one giant log record instead of separate lines. How do we get Dynatrace to split them into individual log events?",
+      "failure_mode": "Suggesting a processing rule or a line-break setting, instead of the payload shape: a JSON array yields one event per element, plain text yields exactly one event per request."
+    },
+    {
+      "id": 7,
+      "name": "request-attribute-top-100",
+      "topic": "Request attribute shows only the top 100 values",
+      "tests": "Span metrics, OpenPipeline, span queries",
+      "prompt": "I created a request attribute to capture customer IDs, but the UI only ever shows the top 100 values and I need the full distribution for a report. How do I get all of them?",
+      "failure_mode": "Suggesting a UI setting or a higher limit, instead of moving to span queries in DQL, extracted span metrics, or OpenPipeline."
+    },
+    {
+      "id": 8,
+      "name": "dynakube-memory-dump",
+      "topic": "Memory dump download with DynaKube",
+      "tests": "spec.activeGate.customProperties",
+      "prompt": "Running the Dynatrace Operator on Kubernetes. Memory dumps are generated but I can't download them from the UI. What do I need to change in the DynaKube?",
+      "failure_mode": "Suggesting a UI permission or an ingress change, instead of the ActiveGate configuration in the DynaKube custom resource."
+    },
+    {
+      "id": 9,
+      "name": "dashboard-variable-in-code-tile",
+      "topic": "Dashboard variable inside a code tile",
+      "tests": "$varname substitution, not context.variables",
+      "prompt": "I have a dashboard variable called env and I want to use it inside a code tile (JavaScript), not just in a DQL tile. How do I read its value in the code?",
+      "failure_mode": "Inventing an object such as context.variables.env or dashboard.getVariable(), instead of the documented substitution form."
+    },
+    {
+      "id": 10,
+      "name": "managed-to-saas-data",
+      "topic": "Managed to SaaS migration of data",
+      "tests": "Configuration migrates, historical data does not",
+      "prompt": "We're moving from Dynatrace Managed to SaaS. What happens to our historical monitoring data — the last two years of metrics, logs and problems? Does it come across with the migration?",
+      "failure_mode": "Implying historical data migrates, or hedging without stating plainly that only configuration is migrated."
+    }
+  ]
+}

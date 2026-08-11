@@ -1,0 +1,170 @@
+{
+  "source": "community.dynatrace.com, threads with an accepted solution",
+  "selected": "2026-08-05",
+  "method": "10 questions x 2 arms (with_skill, baseline). Ground truth is the community-accepted answer, not my judgement. Expectations and predicted failure modes recorded before any run.",
+  "evals": [
+    {
+      "id": "pgi-of-pg",
+      "url": "https://community.dynatrace.com/t5/DQL/How-to-query-process-group-instance-that-belongs-to-a-specific/td-p/297557",
+      "prompt": "In Dynatrace I want to chart JVM heap used for every process group instance that belongs to one specific process group. I tried:\n\ntimeseries avg(dt.runtime.jvm.memory_pool.used), by:{dt.entity.process_group_instance}\n| fieldsAdd process_group = entityAttr(dt.entity.process_group_instance, \"instance_of\")\n| expand process_group\n| fieldsAdd process_group_name = entityName(process_group)\n\nIt does not work. What is the correct DQL?",
+      "ground_truth": "Resolve the process group side separately and join. fetch dt.entity.process_group | filter entity.name ~ \"...\" | fieldsAdd dt.entity.process_group_instance = instantiates[dt.entity.process_group_instance] | expand dt.entity.process_group_instance, then join that against the timeseries on the PGI id. The relationship field is instantiates (or its inverse), reached from the entity table, not via entityAttr(..., \"instance_of\") on the metric stream.",
+      "must_contain": [
+        "instantiates or the entity relationship read from fetch dt.entity.process_group",
+        "a join (or equivalent lookup) between the timeseries and the entity table"
+      ],
+      "predicted_failure_baseline": "Invents an entityAttr attribute name that does not exist, or claims dt.entity.process_group is a dimension of the JVM metric and filters on it directly.",
+      "result_with_skill": "PASS",
+      "result_baseline": "PART",
+      "result_web": "PASS",
+      "result_retest": null
+    },
+    {
+      "id": "spans-by-service-tag",
+      "url": "https://community.dynatrace.com/t5/DQL/More-efficient-way-to-filter-spans-by-service-tags-in-DQL/td-p/298354",
+      "prompt": "In Dynatrace DQL I filter spans by a tag applied to the service, like this:\n\nfetch spans\n| expand entityAttr(dt.entity.process_group_instance, \"tags\"), alias: tags2\n| filter tags2 == $Service\n\nIt works but scans many GB per run. Is there a cheaper way to filter spans by the tag of the related entity?",
+      "ground_truth": "Resolve the tagged entities first and filter spans by entity id, instead of expanding the tags array per span. fetch spans | filter in(dt.entity.service, classicEntitySelector(\"type(SERVICE),tag(\\\"VALUE\\\")\")). With a dashboard variable, build the selector with concat(). Same shape works for PROCESS_GROUP_INSTANCE.",
+      "must_contain": [
+        "classicEntitySelector (or an equivalent entity-id prefilter) used inside filter in(...)",
+        "the reason: expand multiplies rows before the filter"
+      ],
+      "predicted_failure_baseline": "Suggests moving the filter earlier without naming classicEntitySelector, or invents a spans field like span.service.tags.",
+      "result_with_skill": "PASS",
+      "result_baseline": "PASS",
+      "result_web": "PASS",
+      "result_retest": null
+    },
+    {
+      "id": "dpl-line-length",
+      "url": "https://community.dynatrace.com/t5/OTel/Log-Processing-rule-limit-of-line-lenght/td-p/229973",
+      "prompt": "I wrote a Dynatrace log processing rule that strips everything before [ERROR] and stores the rest in a new field. It works in the rule tester, but at runtime the stored field is cut off. What limit am I hitting and how do I work around it?",
+      "ground_truth": "DPL string matchers default to {1,4096}: LD/DATA match at most 4096 bytes by default (LD also stops at the next line break). Raise it with an explicit quantifier, e.g. DATA{1,8192}:message.",
+      "must_contain": [
+        "the 4096 default",
+        "an explicit quantifier such as DATA{1,8192}"
+      ],
+      "predicted_failure_baseline": "Blames log line truncation at ingest (the separate log content limit) or a UI display limit, and offers no quantifier syntax.",
+      "result_with_skill": "PASS",
+      "result_baseline": "MISS",
+      "result_web": "PASS",
+      "result_retest": null
+    },
+    {
+      "id": "nested-json-logs",
+      "url": "https://community.dynatrace.com/t5/Log-Analytics/How-to-retrieve-nested-json-in-fetch-logs/td-p/288436",
+      "prompt": "In Dynatrace I parse a JSON log line and flatten it:\n\nfetch logs\n| parse content, \"LD JSON:json\"\n| fieldsFlatten json, fields:{type,namespace,name,error}\n| parse error, \"LD JSON:error_log\"\n\nThe error field is itself a nested JSON object with error.message, error.status and an error.details array. How do I get message, status and details[0].owner out as columns?",
+      "ground_truth": "Address the nested values by bracket path on the parsed record rather than re-parsing: fieldsAdd errorMessage = json[error][message], errorStatus = json[error][status], errorOwner = json[error][details][0][owner]. fieldsFlatten only lifts the named top-level fields.",
+      "must_contain": [
+        "bracket path access such as json[error][message]",
+        "array index access for details[0]"
+      ],
+      "predicted_failure_baseline": "Chains a second parse over the error field, or uses dot notation json.error.message which is not how a parsed record is indexed.",
+      "result_with_skill": "PART",
+      "result_baseline": "PART",
+      "result_web": "PASS",
+      "result_retest": "PASS",
+      "note": "skill missed jsonPath and fieldsFlatten depth:, both in the corpus; web found them. Fixed by adding 'Reaching into nested structures' to dql.md. Retest also established that fieldsFlatten depth: cannot reach details[0] at all, and that `status` collides with a built-in logs field."
+    },
+    {
+      "id": "metric-dimension-limits",
+      "url": "https://community.dynatrace.com/t5/Log-Analytics/Metric-dimension-limits/td-p/294885",
+      "prompt": "I have a log metric configured in Dynatrace classic settings with very many dimension combinations. dt.sfm.server.metrics.rejections reports: \"This metric key has reached the maximum number of tuples for a single metric for the last 30 days.\" We are on Grail, and the docs say dimensions are effectively unlimited on Grail. Why is the classic limit hitting us, and what do I change?",
+      "ground_truth": "A log metric defined in classic settings is a classic metric and is subject to the classic per-metric limit of 1 million dimension tuples over a rolling 30-day window; once reached, points with unseen tuples are dropped. To escape it the metric must be extracted in OpenPipeline instead. Bonus, from a support case rather than the docs: dt.* system dimensions do not count toward the classic tuple limit, and dsfm:server.metrics.metric_dimensions_usage is the reliable way to watch the limit.",
+      "must_contain": [
+        "the 1 million per-metric tuple limit and the 30-day sliding window",
+        "the fix: extract the metric in OpenPipeline"
+      ],
+      "predicted_failure_baseline": "Says Grail removes the limit so this must be a bug, or advises reducing cardinality without naming OpenPipeline extraction as the actual escape.",
+      "result_with_skill": "PASS",
+      "result_baseline": "PART",
+      "result_web": "PASS",
+      "result_retest": null
+    },
+    {
+      "id": "sql-bind-variables",
+      "url": "https://community.dynatrace.com/t5/DQL/Access-to-SQL-Bind-variables-on-spans-in-Grail/td-p/295945",
+      "prompt": "Can I see SQL bind variables on spans in Dynatrace Grail via DQL, and if so how do I reference them? I do not see them in my query results.",
+      "ground_truth": "They exist but are gated behind a fieldset permission. The querying user needs ALLOW storage:fieldsets:read WHERE storage:fieldset-name = \"builtin-sensitive-spans\". Without it the fields are simply absent from results rather than erroring.",
+      "must_contain": [
+        "the missing piece is an IAM permission, not a missing feature",
+        "the fieldset name builtin-sensitive-spans"
+      ],
+      "predicted_failure_baseline": "Says bind variables are not captured or not available in Grail, or points only at a span-capture setting and never mentions fieldset permissions.",
+      "result_with_skill": "PASS",
+      "result_baseline": "MISS",
+      "result_web": "PASS",
+      "result_retest": null,
+      "note": "the discriminating question of the set: baseline said bind variables are unavailable in Grail; the answer is an IAM fieldset permission."
+    },
+    {
+      "id": "appfunctions-limits",
+      "url": "https://community.dynatrace.com/t5/Developer-Q-A-Forum/Clarification-on-AppFunctions-limitation/td-p/218506",
+      "prompt": "The Dynatrace developer docs say app functions run in an environment with 256 MB RAM and cannot send binary responses. Two questions: if my app has several app functions, do they all share the 256 MB? And does no binary response mean JSON only?",
+      "ground_truth": "Each app function runs in its own environment and gets its own 256 MB; two functions get 256 MB each, not 128 each. No binary means no images or video; text is fine, either JSON or plain text. Response size is capped at roughly 5 MB.",
+      "must_contain": [
+        "256 MB is per function, not shared",
+        "plain text is allowed as well as JSON"
+      ],
+      "predicted_failure_baseline": "Hedges on whether the 256 MB is shared, or asserts JSON-only.",
+      "result_with_skill": "PART",
+      "result_baseline": "PART",
+      "result_web": "PART",
+      "result_retest": "PASS",
+      "note": "corpus gap, not a skill failure: the limits live on developer.dynatrace.com, which was not mirrored. Fixed by harvesting that site. Retest answers it and narrows the residual unknown to concurrent invocations."
+    },
+    {
+      "id": "oauth-token-expiry",
+      "url": "https://community.dynatrace.com/t5/Developer-Q-A-Forum/Can-we-adjust-OAuth-Bearer-Token-Expiration-time/td-p/221547",
+      "prompt": "I call the Dynatrace business events ingest endpoint with an OAuth client. The bearer token comes back with a very short lifetime. Can I make it longer?",
+      "ground_truth": "No. The token lifetime is 5 minutes and is not configurable, deliberately, for security. Re-request a token as needed.",
+      "must_contain": [
+        "5 minutes",
+        "not configurable"
+      ],
+      "predicted_failure_baseline": "Invents a settings screen or an expires_in request parameter, or says to contact support to have it raised.",
+      "result_with_skill": "PASS",
+      "result_baseline": "PASS",
+      "result_web": "PASS",
+      "result_retest": null
+    },
+    {
+      "id": "usql-vs-dql-sessions",
+      "url": "https://community.dynatrace.com/t5/Dashboarding/USQL-vs-DQL-different-session-counts-contradictory-docs-on/td-p/301305",
+      "prompt": "In Dynatrace, USQL and DQL give me different session counts for the same application and time range. My DQL is roughly: fetch user.events | filter frontend.name == \"MyApp\" | summarize countDistinct(dt.rum.session.id). Why is the DQL number higher, and how do I get something comparable to USQL?",
+      "ground_truth": "user.events emits multiple events per view with different characteristics.classifier values (request, error, navigation, user_action, view_summary, page_summary, visibility_change, other). Counting distinct session ids across all of them inflates the number. Filter to one classifier, e.g. characteristics.classifier == \"navigation\", to get close to USQL. An exact 1:1 match is not expected; the two are different data models. USQL is also documented inconsistently on whether it includes active sessions, and in practice returns fewer sessions.",
+      "must_contain": [
+        "characteristics.classifier as the cause",
+        "filter to a single classifier, and no exact 1:1 match is expected"
+      ],
+      "predicted_failure_baseline": "Blames timezone or timeframe boundaries, or session replay sampling, and never names characteristics.classifier.",
+      "result_with_skill": "DIVERGENT",
+      "result_baseline": "MISS",
+      "result_web": "DIVERGENT",
+      "result_retest": "PASS",
+      "note": "graded MISS but adjudicated DIVERGENT: the accepted answer recommends filtering on characteristics.classifier, which the Semantic Dictionary marks 'not intended for query usage' and experimental. The skill's fetch user.sessions route is better grounded. Fixed by DT78, which now requires naming both with their provenance."
+    },
+    {
+      "id": "url-sampling-vs-exclude",
+      "url": "https://community.dynatrace.com/t5/Open-Q-A/URL-based-sampling-vs-excluding-web-request-URLs/td-p/242497",
+      "prompt": "In Dynatrace there seem to be two ways to stop capturing an incoming web request: Server-side service monitoring > URL-based sampling with \"Ignore URLs with specific path and/or query parameters\", and Server-side service monitoring > Deep monitoring > \"Exclude specific incoming web request URLs\". They look equivalent. Is there any reason to still choose the second one?",
+      "ground_truth": "URL-based sampling is the newer mechanism (OneAgent 1.279+) and is the recommended one where available: it can ignore an endpoint outright or merely reduce its capture rate, matches on method and query parameters, and can be scoped to process groups. The exclusion under deep monitoring is permanent and unconditional. Ignored captures are not stored and consume no retention. Capture rate can be tracked via adaptive traffic management.",
+      "must_contain": [
+        "URL-based sampling is the newer and generally recommended option",
+        "the difference in behaviour: sampling can reduce rather than fully drop, exclusion is unconditional"
+      ],
+      "predicted_failure_baseline": "Treats the two as interchangeable, or invents a rationale such as one applying to inbound and the other to outbound.",
+      "result_with_skill": "PASS",
+      "result_baseline": "PART",
+      "result_web": "PASS",
+      "result_retest": "PASS",
+      "note": "graded MISS on regex artifacts; substance was correct. Web arm made a more current claim (OneAgent 1.331). Fixed by DT79 on undocumented Settings surfaces."
+    }
+  ],
+  "arms": {
+    "with_skill": "dynatrace skill + local corpora",
+    "baseline": "no skills, no corpus, no web; exactly one tool call (Write) each - verified",
+    "web": "no skills, no corpus, full internet",
+    "retest": "with_skill again, after the fixes the first run motivated (2026-08-06)"
+  },
+  "outcome": "Adjudicated by hand after the grader produced 3 false verdicts against the skill and 4 against the web arm - every automated verdict was checked. Clean/qualified/wrong: skill 7/3/0, web 8/2/0, baseline 3/4/3. The web arm matched the skill on accuracy at lower token cost, so 'local corpus beats live docs' did not hold. The difference is the shape of the errors: the skill fails toward 'not documented', the web arm fails toward a fabricated authority - it asserted a community 'Mentor' rank meant Dynatrace staff. After the fixes, the four weak questions retest 4/4.",
+  "grader": "dynatrace-workspace/grade3.py - pattern based, negation aware, and still wrong often enough that every verdict needs a manual check."
+}

@@ -1,0 +1,14 @@
+# LF in the repository, always. The corpus tooling writes LF deliberately —
+# CRLF drift makes every cross-machine diff noise and breaks byte comparison
+# between a corpus built on Windows and one built anywhere else.
+* text=auto eol=lf
+
+*.md    text eol=lf
+*.py    text eol=lf
+*.json  text eol=lf
+*.tsv   text eol=lf
+*.sh    text eol=lf
+
+*.png   binary
+*.jpg   binary
+*.svg   text eol=lf
