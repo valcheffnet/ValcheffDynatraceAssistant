@@ -1,6 +1,6 @@
 # Install
 
-Three steps. Nothing to run, nothing to compile, no Python.
+Three steps. Copy a directory, set two variables, ask one question.
 
 ## 1. Copy the skill
 
@@ -72,4 +72,4 @@ ordinary. Redistributing it is not — see `README.md`.
 rm -rf ~/.claude/skills/dynatrace
 ```
 
-Nothing else was written anywhere.
+That is the only place the skill lives.

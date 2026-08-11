@@ -8,19 +8,14 @@ is used here only to name the product this skill is about.
 
 ---
 
-## What this is, and what it deliberately is not
+## What this is
 
-**It is** ~39 000 words of distilled reference across 30 files, 85 recorded
-places where the official documentation is wrong or contradicts itself, and a
-map of 1 015 UI navigation routes split by platform generation.
+~39 000 words of distilled reference across 30 files, 85 recorded places where
+the official documentation is wrong or contradicts itself, and a map of 1 015 UI
+navigation routes split by platform generation.
 
-**It is not a copy of the Dynatrace documentation**, and it is not a scraper.
-No corpus is included and none ever will be. The skill reads a local copy of the
-documentation that you build yourself, with tooling of your own; it never
-fetches or redistributes anything.
-
-The value is the judgement layer, not the text. Anyone can read the docs; the
-work was in measuring where they mislead.
+The value is the judgement layer. Anyone can read the docs; the work was in
+measuring where they mislead.
 
 ## What you get
 
@@ -44,9 +39,10 @@ work was in measuring where they mislead.
 
 ## The corpus
 
-The skill routes to a local Markdown copy of `docs.dynatrace.com` and
-`developer.dynatrace.com`. **You build that copy; this repository does not ship
-it and does not build it for you.**
+For anything its own references do not cover, the skill greps a local Markdown
+copy of `docs.dynatrace.com` and `developer.dynatrace.com`. **That copy is
+yours to build** — the repository holds knowledge about the documentation, not
+the documentation itself, and nothing here fetches anything.
 
 Any HTML-to-Markdown pipeline will do. What the skill expects:
 
@@ -59,10 +55,6 @@ lives; they are documented at the top of `references/corpus-map.md`. If you have
 no corpus yet the skill still loads — it just tells you when an answer would
 need one, instead of inventing it.
 
-Building a local copy of public documentation for your own reference is
-ordinary. Redistributing it is not, and neither this repository nor the skill
-helps you do that.
-
 ## Install
 
 ```bash
@@ -70,7 +62,7 @@ git clone https://github.com/valcheffnet/ValcheffDynatraceAssistant.git
 cp -r ValcheffDynatraceAssistant/skills/dynatrace ~/.claude/skills/
 ```
 
-That is all of it. No installer, no Python, nothing compiled. See
+That is all of it — the skill is Markdown, read in place. See
 [INSTALL.md](INSTALL.md) for the Windows form, how to point the skill at a
 corpus, and how to check it loaded.
 
