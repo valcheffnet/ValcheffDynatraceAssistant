@@ -1,6 +1,6 @@
 ---
 name: dynatrace
-description: Dynatrace expert for latest Dynatrace (the Grail platform) and Classic, answering from a local 4403-page copy of docs.dynatrace.com plus distilled references rather than recollection. Covers DQL and DPL, Grail buckets and retention, exact field and entity names, OpenPipeline, IAM ABAC policies, segments, OneAgent and ActiveGate, Kubernetes/OpenTelemetry/cloud ingest, dashboards and notebooks, workflows, SLOs and Site Reliability Guardian, Davis AI and problems, Application Security, DPS licensing and cost, the Dynatrace API, Monaco and Terraform, AppEngine app development (app functions, the SDK, app manifest), and Classic-to-latest migration.
+description: Dynatrace expert for latest Dynatrace (the Grail platform) and Classic, answering from distilled references and the operator's own local copy of the documentation rather than recollection. Covers DQL and DPL, Grail buckets and retention, exact field and entity names, OpenPipeline, IAM ABAC policies, segments, OneAgent and ActiveGate, Kubernetes/OpenTelemetry/cloud ingest, dashboards and notebooks, workflows, SLOs and Site Reliability Guardian, Davis AI and problems, Application Security, DPS licensing and cost, the Dynatrace API, Monaco and Terraform, AppEngine app development (app functions, the SDK, app manifest), and Classic-to-latest migration.
 when_to_use: Use for anything touching Dynatrace or its concepts, in any language and however narrowly phrased - naming one field, endpoint, permission or menu item is enough. Trigger terms: Dynatrace, Grail, DQL, DPL, OneAgent, ActiveGate, Davis, Smartscape, OpenPipeline, AppEngine, AutomationEngine, DynaKube, Monaco, EdgeConnect, DPS, USQL, Site Reliability Guardian, Session Replay, Anomaly Detection, bucket, segment, management zone, host unit, primary tag, fieldset, dt.entity, dt.security_context, bizevents, timeseries, makeTimeseries.
 allowed-tools: Read Grep Glob Bash WebFetch
 ---
@@ -51,8 +51,9 @@ corpus on this machine: say so and go to step 3 rather than guessing at a path.
    `@dynatrace-sdk/*` reference, platform services. **A question about app
    function memory, payload caps or an SDK call is answered here and nowhere in
    the docs corpus** — grepping the first one harder will not produce it.
-3. **Go to the live web.** `scripts/dtfetch.sh <path>` for a docs.dynatrace.com
-   page newer than the snapshot; plain curl with a browser User-Agent for
+3. **Go to the live web.** Fetch the page directly for a docs.dynatrace.com
+   page newer than the snapshot — see "Reaching the live site" in
+   `references/corpus-map.md`; plain curl with a browser User-Agent for
    `community.dynatrace.com` (forum threads, weakest authority) or for the
    `design/` part of developer.dynatrace.com, which was deliberately not
    harvested.
@@ -82,9 +83,10 @@ rather than a second door. Quote the path with its generation and how old the
 source is; if the index has no row, say so and ask for a screenshot. An earlier
 version of this section simply said "do not guess" and that did not work.
 
-The rationale matches the Splunk skills: the global instruction in
-`~/.claude/CLAUDE.md` requiring a skill consult before any Splunk technical
-claim applies identically to Dynatrace.
+**Why the protocol is a hard rule and not a preference.** Dynatrace answers
+given from memory are wrong often enough, and confidently enough, that the
+consult is cheaper than the correction. Every relaxation of it in testing
+produced a fluent answer with an invented field name in it.
 
 ### Reference index
 
@@ -119,7 +121,7 @@ claim applies identically to Dynatrace.
 | **`ui-map.md`** | **Menu paths by destination, split Classic/latest, with age. Consult before stating any navigation path.** |
 | **`app-development.md`** | **AppEngine and app functions with their limits, `app.config.json`, scopes, platform service URLs, the `@dynatrace-sdk/*` map, `dt-app`, intents. The only reference sourced from the developer corpus.** |
 | **`gotchas.md`** | **76 entries: where the documentation disagrees with the product. Grep BEFORE quoting any identifier.** |
-| **`corpus-map.md`** | **The corpus and the live site — 4403 pages, section map, what lives where, how to grep it, how to reach docs.dynatrace.com** |
+| **`corpus-map.md`** | **Where your corpus lives, the section map, what lives where, how to grep it, and how to reach the live site** |
 
 Uncovered domains are listed at the end of this file. When adding a reference,
 update both this table and the frontmatter `description`, or the triggers and
@@ -134,8 +136,9 @@ the contents drift apart.
   Dashboard, workflow, DPS, PGI (process group instance), host unit, monitoring
   candidate. A translated identifier cannot be grepped against the product or
   the corpus.
-- Assume a strong observability background (Splunk admin and ITSI expertise).
-  Splunk-to-Dynatrace analogies help; explaining the basics does not.
+- Assume an observability background. Analogies to whatever tool the reader
+  came from — Splunk, Elastic, Datadog, Prometheus — land better than
+  explaining what a metric is.
 - Terse and actionable. Show real DQL or API code rather than describing it.
 
 ## Golden rule: "latest" is not "classic" — always establish which
@@ -273,8 +276,9 @@ each — for both the local corpus and the live site, so searching is not blind.
 browser:
 
 ```bash
-scripts/dtfetch.sh platform/grail/dynatrace-query-language/functions
-# → scripts/cache/platform__grail__dynatrace-query-language__functions.txt
+curl -sS "https://docs.dynatrace.com/docs/platform/grail/dynatrace-query-language/functions" \
+  -H "User-Agent: Mozilla/5.0" -o page.html
+# then read page.html, or use WebFetch on the same URL
 ```
 
 Use this when current or deep detail is needed that the references do not

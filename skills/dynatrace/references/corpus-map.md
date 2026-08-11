@@ -30,7 +30,7 @@ as decoration.
 
 This is the depth layer. Use it when `references/` does not answer the question. The same
 section names apply to the live site, so the maps below serve both grepping the corpus and
-building a `dtfetch.sh` path.
+building a live URL by hand.
 
 ## Contents
 
@@ -55,7 +55,7 @@ building a `dtfetch.sh` path.
 2. **`references/gotchas.md`** — grep any identifier the user quoted, *before* answering.
    The documentation is wrong in ~200 known places.
 3. **This corpus** — grep it. Offline, complete, and it contains the image content.
-4. **Live docs** — `scripts/dtfetch.sh <path>` only when the corpus misses the topic
+4. **Live docs** — fetch the page (below) only when the corpus misses the topic
    entirely or the page is newer than the snapshot. Say so when you fall back.
 
 Do not fall back to the live site for something the corpus already has. The corpus is
@@ -339,12 +339,26 @@ forum opinion ends up quoted as documented fact.
 ## Reaching the live site
 
 Base URL for every path above: `https://docs.dynatrace.com/docs/<path>`. Pages are
-server-rendered, so plain text comes out without a browser:
+server-rendered, so the text is in the HTML — no browser or JavaScript needed.
+
+**Simplest: use `WebFetch` on the URL.** It handles retrieval and extraction in
+one step, and is the right default inside a Claude session.
+
+If you want the raw file, curl it with a browser User-Agent — the site answers
+403 to anything that looks like a bot:
 
 ```bash
-scripts/dtfetch.sh platform/grail/dynatrace-query-language/functions
-# → scripts/cache/platform__grail__dynatrace-query-language__functions.txt
+curl -sSf --max-time 45 \
+  -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36" \
+  "https://docs.dynatrace.com/docs/platform/grail/dynatrace-query-language/functions" \
+  -o page.html
 ```
+
+That leaves navigation, cookie banners and footer boilerplate around the
+content. Read past them rather than stripping them: a one-off fetch is read
+once, and every stripping rule is a chance to delete something real. If you are
+converting many pages rather than reading one, that is corpus-building work and
+belongs in whatever pipeline built your corpus, not here.
 
 The live sitemap, if the section counts above need rebuilding:
 
@@ -417,7 +431,7 @@ from a fresh sitemap. The procedure your corpus was built with should be
 recorded alongside it; this skill reads a corpus but does not build one.
 
 If a question turns on behaviour that changed recently, check `lastmod` on the page being
-quoted, and fall back to `dtfetch.sh` when it looks stale.
+quoted, and fetch the live page when it looks stale.
 
 ## Other reports in `_reports/`
 
