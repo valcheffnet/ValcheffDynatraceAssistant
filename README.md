@@ -72,9 +72,12 @@ git clone https://github.com/valcheffnet/ValcheffDynatraceAssistant.git
 cp -r ValcheffDynatraceAssistant/skills/dynatrace ~/.claude/skills/
 ```
 
-That is all of it — the skill is Markdown, read in place. See
-[INSTALL.md](INSTALL.md) for the Windows form, how to point the skill at a
-corpus, and how to check it loaded.
+That is all of it — the skill is Markdown, read in place.
+
+**It works with GitHub Copilot too.** Agent Skills is an open standard, and
+`~/.claude/skills/` is one of the directories Copilot reads, so a single copy
+serves both. See [INSTALL.md](INSTALL.md) for Copilot's own paths, the Windows
+form, how to point the skill at a corpus, and how to check it loaded.
 
 ## Status and limits
 

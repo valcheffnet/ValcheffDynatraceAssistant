@@ -17,6 +17,41 @@ Copy-Item -Recurse skills\dynatrace "$env:USERPROFILE\.claude\skills\"
 That is the whole installation. Claude Code picks the skill up on the next
 session and triggers it on any Dynatrace question.
 
+## Also works with GitHub Copilot
+
+Agent Skills is an open standard, and Copilot reads the same `SKILL.md` format
+from the same directories. **`~/.claude/skills/` is on Copilot's list too**, so
+the copy above serves both tools — there is nothing further to do.
+
+If you would rather keep it with a project, or prefer Copilot's own paths:
+
+| scope | directories read |
+|---|---|
+| personal | `~/.copilot/skills/`, `~/.claude/skills/`, `~/.agents/skills/` |
+| project | `.github/skills/`, `.claude/skills/`, `.agents/skills/` |
+
+```bash
+cp -r skills/dynatrace <your-repo>/.github/skills/
+```
+
+Type `/skills` in Copilot chat to confirm it is listed, or `/dynatrace` to load
+it directly. VS Code also exposes extra locations through the
+`chat.agentSkillsLocations` setting.
+
+Two details worth knowing:
+
+- **The directory name must equal the `name` in the frontmatter.** Both are
+  `dynatrace` here; renaming the folder without renaming the field makes the
+  skill fail to load, silently.
+- `when_to_use` and `allowed-tools` in the frontmatter are Claude Code fields.
+  Copilot discovers a skill from `description` alone, which is written to carry
+  the trigger terms on its own — so both tools find it, from slightly different
+  signals.
+
+This repository was built and measured against Claude Code. The Copilot path
+follows the published specification rather than testing here; if it misbehaves,
+that is worth an issue.
+
 ## 2. Point it at a corpus, if you have one
 
 The skill answers from its own references first. For anything they do not
